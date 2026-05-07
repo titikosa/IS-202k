@@ -4,6 +4,7 @@
     <title>Список дел</title>
 
     <style>
+
         body {
             font-family: Arial;
             margin: 40px;
@@ -20,8 +21,18 @@
         }
 
         li {
-            margin: 10px 0;
+            margin: 15px 0;
         }
+
+        .done {
+            text-decoration: line-through;
+            color: gray;
+        }
+
+        button {
+            margin-left: 5px;
+        }
+
     </style>
 </head>
 
@@ -33,12 +44,35 @@
 
         {% for task in tasks %}
 
-            <li>
-                {{ task }}
-                <a href="/delete/{{ loop.index0 }}">
-                    Удалить
-                </a>
-            </li>
+        <li>
+
+            {% if task.done %}
+
+                <span class="done">
+                    {{ task.text }}
+                </span>
+
+            {% else %}
+
+                <span>
+                    {{ task.text }}
+                </span>
+
+            {% endif %}
+
+            <a href="/done/{{ loop.index0 }}">
+                Выполнено
+            </a>
+
+            <a href="/delete/{{ loop.index0 }}">
+                Удалить
+            </a>
+
+           <button onclick="editTask({{ loop.index0 }}, '{{ task.text }}')">
+    Редактировать
+</button>
+
+        </li>
 
         {% endfor %}
 
@@ -48,16 +82,48 @@
 
     <form method="POST" action="/add">
 
-        <input type="text"
-               name="task"
-               placeholder="Новая задача"
-               required>
+        <input
+            type="text"
+            name="task"
+            placeholder="Новая задача"
+            required
+        >
 
         <button type="submit">
             Добавить
         </button>
 
     </form>
+<script>
 
+function editTask(taskId, oldText) {
+
+    let newText = prompt(
+        "Редактировать задачу:",
+        oldText
+    );
+
+    if (newText && newText.trim() !== '') {
+
+        fetch('/edit/' + taskId, {
+
+            method: 'POST',
+
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+
+            body: 'new_text=' + encodeURIComponent(newText)
+
+        })
+
+        .then(() => {
+            location.reload();
+        });
+
+    }
+}
+
+</script>
 </body>
 </html>
